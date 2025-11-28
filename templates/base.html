@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LocalShop{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Header */
+        header {
+            background-color: #1e1e2f;
+            color: #fff;
+            padding: 15px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 35px;
+            right: 0;
+            background-color: #2c2c3f;
+            min-width: 150px;
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        .dropdown-content a {
+            display: block;
+            padding: 10px 15px;
+            color: #fff;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #444;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Main content */
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1e1e2f;
+            color: #fff;
+            padding: 20px;
+        }
+
+        footer .footer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        footer .footer-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        footer a {
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #ffd700;
+        }
+
+        @media (min-width: 768px) {
+            footer .footer-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <div class="logo"><a href="#">LocalShop</a></div>
+            <div class="nav-links">
+                <a href="#">Главная</a>
+                <a href="#">Товары</a>
+                {% if user.is_authenticated %}
+                    <a href="#">Корзина</a>
+                    <div class="dropdown">
+                        <a href="#">{{ user.email }}</a>
+                        <div class="dropdown-content">
+                            <a href="#">Мои заказы</a>
+                            <a href="#">Профиль</a>
+                            <a href="#">Выйти</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}">Войти</a>
+                    <a href="{% url 'register' %}">Регистрация</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2025 LocalShop. Все права защищены.</p>
+            <div class="footer-links">
+                <a href="#">Instagram</a>
+                <a href="#">Facebook</a>
+                <a href="#">Telegram</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
