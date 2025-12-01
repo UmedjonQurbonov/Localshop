@@ -13,7 +13,7 @@
     </tr>
 
     {% for item in items %}
-    <tr style="border-bottom:1px solid #ddd; text-align:center;">
+    <tr style="border-bottom:1px solid #ddd; text-align: center;">
         <td>{{ item.product.name }}</td>
         <td>{{ item.quantity }}</td>
         <td>{{ item.product.price }}</td>
@@ -26,6 +26,7 @@
     Общая сумма: {{ total_price }} сомони
 </p>
 
+<a href="{% url 'checkout' %}">Оформить заказ</a>
 
 {% else %}
 <p>Ваша корзина пуста.</p>

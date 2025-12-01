@@ -143,11 +143,9 @@
                     <a href="{% url 'cart' %}">Корзина</a>
                     <div class="dropdown">
                         <a href="#">{{ user.email }}</a>
-                        <div class="dropdown-content">
-                            <a href="#">Мои заказы</a>
+                            <a href="{% url 'my_orders' %}">Мои заказы</a>
                             <a href="#">Профиль</a>
-                            <a href="#">Выйти</a>
-                        </div>
+                            <a href="{% url 'logout' %}">Выйти</a>
                     </div>
                 {% else %}
                     <a href="{% url 'login' %}">Войти</a>

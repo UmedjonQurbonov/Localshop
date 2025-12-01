@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа{% endblock title %}
+
+{% block content %}
+<h2>Оформление заказа</h2>
+
+{% if items %}
+<table style="width:100%; border-collapse: collapse; margin-bottom:20px;">
+    <tr style="background:#222; color:white;">
+        <th>Товар</th>
+        <th>Количество</th>
+        <th>Цена за единицу</th>
+        <th>Итого</th>
+    </tr>
+    {% for item in items %}
+    <tr style="border-bottom:1px solid #ddd;">
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.product.price }}</td>
+        <td>{{ item.total_price }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<p style="font-weight:bold;">Общая сумма: {{ total_price }} сомони</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="
+        padding:10px 20px;
+        background:#28a745;
+        color:white;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+    "
+    onmouseover="this.style.background='#218838'"
+    onmouseout="this.style.background='#28a745'">
+        Подтвердить заказ
+    </button>
+</form>
+
+{% else %}
+<p>Ваша корзина пуста.</p>
+{% endif %}
+
+{% endblock content %}

@@ -1,9 +1,16 @@
-from django.views.generic import ListView,DetailView
+from django.views.generic import ListView,DetailView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
 from datetime import date
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+import requests
+
+def send_telegram_message(token, chat_id, text):
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text}
+    requests.post(url, data=payload)
+
 
 class CategoryListView(ListView):
     model = Category
@@ -97,3 +104,64 @@ def add_to_cart(request, product_id):
 
     return redirect('cart')
 
+def send_telegram_message(text):
+    TG_TOKEN = "8358129923:AAFk230-gOABG0TagvKRAHKRS41YaCGw8Yg"
+    TG_CHAT_ID = 1066934350
+    url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
+    payload = {"chat_id": TG_CHAT_ID, "text": text}
+    requests.post(url, data=payload)
+
+class CheckoutView(LoginRequiredMixin, TemplateView):
+    template_name = 'checkout.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = Order.objects.filter(user=self.request.user, status='new').first()
+        if order:
+            context['items'] = order.orderitem_set.all()
+            context['total_price'] = sum([item.total_price() for item in context['items']])
+        else:
+            context['items'] = []
+            context['total_price'] = 0
+        return context
+
+    def post(self, request, *args, **kwargs):
+        order = Order.objects.filter(user=request.user, status='new').first()
+        if order:
+            # 1️⃣ Уменьшаем quantity у каждого продукта
+            for item in order.orderitem_set.all():
+                product = item.product
+                if product.quantity >= item.quantity:
+                    product.quantity -= item.quantity
+                else:
+                    product.quantity = 0
+                product.save()
+
+            # 2️⃣ Меняем статус заказа на confirmed
+            order.status = 'confirmed'
+            order.save()
+
+            # 3️⃣ Формируем сообщение для Telegram
+            tg_message = f"Новый заказ от {request.user.email}:\n"
+            for item in order.orderitem_set.all():
+                tg_message += f"{item.product.name} - {item.quantity} шт.\n"
+            tg_message += f"Общая сумма: {sum([i.total_price() for i in order.orderitem_set.all()])} сомони"
+
+            # 4️⃣ Отправляем уведомление в Telegram
+            send_telegram_message(tg_message)
+
+        # 5️⃣ Перенаправляем пользователя (например, в корзину или на страницу благодарности)
+        return redirect('cart')
+
+class MyOrdersListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = 'my_orders.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        # Получаем все заказы пользователя
+        orders = Order.objects.filter(user=self.request.user).order_by('-created_at')
+        # Добавляем поле total_price для каждого заказа
+        for order in orders:
+            order.total_price = sum(item.total_price() for item in order.orderitem_set.all())
+        return orders

@@ -49,6 +49,7 @@ def login_view(request):
             return redirect('home')
         else:
             return render(request, "login.html", {"error": "Invalid credentials"})   
+        
 def logout_view(request):
     logout(request)
     return redirect('login')

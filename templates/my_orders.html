@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Мои заказы{% endblock title %}
+
+{% block content %}
+<h2>Мои заказы</h2>
+
+{% if orders %}
+    {% for order in orders %}
+        <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:20px;">
+            <p><strong>Заказ №{{ order.id }}</strong> — {{ order.created_at|date:"Y-m-d H:i" }}</p>
+            <p>Статус: 
+                {% if order.status == 'new' %} 🛒 В корзине
+                {% elif order.status == 'confirmed' %} ✅ Подтверждён
+                {% elif order.status == 'shipped' %} 🚚 Отправлен
+                {% elif order.status == 'delivered' %} 📦 Доставлен
+                {% endif %}
+            </p>
+            
+            <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+                <tr style="background:#222; color:white;">
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Цена за единицу</th>
+                    <th>Итого</th>
+                </tr>
+                {% for item in order.orderitem_set.all %}
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }}</td>
+                    <td>{{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <p style="font-weight:bold; margin-top:10px;">
+                Общая сумма: {{ order.total_price }} сомони
+            </p>
+        </div>
+    {% endfor %}
+{% else %}
+<p>У вас пока нет заказов.</p>
+{% endif %}
+
+{% endblock content %}
