@@ -1,6 +1,9 @@
 from django.views.generic import ListView,DetailView
-from .models import Category, Product, DeletedProduct
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import *
 from datetime import date
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 
 class CategoryListView(ListView):
     model = Category
@@ -58,3 +61,39 @@ class DeletedProductListView(ListView):
     model = DeletedProduct
     template_name = 'deleted_products.html'
     context_object_name = 'deleted_products'
+
+class CartView(LoginRequiredMixin, ListView):
+    template_name = 'cart.html'
+    context_object_name = 'items'
+
+    def get_queryset(self):
+        order = Order.objects.filter(user=self.request.user, status='new').first()
+        if order:
+            return order.orderitem_set.all()
+        return []
+
+def get_or_create_order(user):
+    order, created = Order.objects.get_or_create(user=user, status='new')
+    return order
+def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items = context['items']
+        total = sum([item.total_price() for item in items])
+        context['total_price'] = total
+        return context
+
+@login_required
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    order = get_or_create_order(request.user)
+    quantity = int(request.POST.get('quantity', 1))
+
+    order_item, created = OrderItem.objects.get_or_create(order=order, product=product)
+    if not created:
+        order_item.quantity += quantity
+    else:
+        order_item.quantity = quantity
+    order_item.save()
+
+    return redirect('cart')
+

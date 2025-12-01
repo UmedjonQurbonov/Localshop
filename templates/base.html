@@ -137,10 +137,10 @@
         <nav>
             <div class="logo"><a href="#">LocalShop</a></div>
             <div class="nav-links">
-                <a href="#">Главная</a>
-                <a href="#">Товары</a>
+                <a href="{% url 'home' %}">Главная</a>
+                <a href="{% url 'category_list' %}">Kатегории</a>
                 {% if user.is_authenticated %}
-                    <a href="#">Корзина</a>
+                    <a href="{% url 'cart' %}">Корзина</a>
                     <div class="dropdown">
                         <a href="#">{{ user.email }}</a>
                         <div class="dropdown-content">
@@ -167,7 +167,7 @@
         <div class="footer-container">
             <p>&copy; 2025 LocalShop. Все права защищены.</p>
             <div class="footer-links">
-                <a href="#">Instagram</a>
+                <a href="https://www.instagram.com/umed.q_1903?utm_source=qr&igsh=aWVvdm5uZ29hMTZz">Instagram</a>
                 <a href="#">Facebook</a>
                 <a href="#">Telegram</a>
             </div>

@@ -33,7 +33,7 @@
         <p style="color:#444; line-height:1.4;">{{ product.description|linebreaks }}</p>
 
 
-        {% comment %} <form action="{% url 'cart_add' product.id %}" method="post" style="margin-top:20px;">
+      <form action="{% url 'cart_add' product.id %}" method="post" style="margin-top:20px;">
             {% csrf_token %}
             <label for="quantity" style="margin-right:10px;">Количество:</label>
             <input type="number" name="quantity" id="quantity" value="1" min="1" style="
@@ -50,7 +50,7 @@
             onmouseover="this.style.background='#218838'"
             onmouseout="this.style.background='#28a745'"
             >Добавить в корзину</button>
-        </form> {% endcomment %}
+        </form> 
 
         {% if product.discount > 0 %}
     <p style="margin-top:15px;">
