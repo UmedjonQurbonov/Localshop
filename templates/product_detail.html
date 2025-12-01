@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %} Product detail {% endblock title %}
+
+{% block content %}
+
+<div style="display:flex; flex-wrap:wrap; justify-content:center; margin-top:30px; gap:20px;">
+
+    <div style="flex:1; min-width:300px; max-width:400px;">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="
+                width:100%;
+                border-radius:10px;
+                object-fit:cover;
+            ">
+        {% else %}
+            <div style="
+                width:100%;
+                height:300px;
+                background:#eee;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border-radius:10px;
+            ">
+                Нет фото
+            </div>
+        {% endif %}
+    </div>
+    <div style="flex:1; min-width:300px; max-width:400px; border:1px solid #ddd; border-radius:10px; padding:20px;">
+        <h2 style="margin-top:0;">{{ product.name }}</h2>
+        <p style="color:#555;">Категория: {{ product.category.name }}</p>
+
+        <p style="color:#444; line-height:1.4;">{{ product.description|linebreaks }}</p>
+
+
+        {% comment %} <form action="{% url 'cart_add' product.id %}" method="post" style="margin-top:20px;">
+            {% csrf_token %}
+            <label for="quantity" style="margin-right:10px;">Количество:</label>
+            <input type="number" name="quantity" id="quantity" value="1" min="1" style="
+                width:60px; padding:5px; border:1px solid #ccc; border-radius:5px;
+            ">
+            <button type="submit" style="
+                padding:8px 20px;
+                background:#28a745;
+                color:white;
+                border:none;
+                border-radius:5px;
+                cursor:pointer;
+            "
+            onmouseover="this.style.background='#218838'"
+            onmouseout="this.style.background='#28a745'"
+            >Добавить в корзину</button>
+        </form> {% endcomment %}
+
+        {% if product.discount > 0 %}
+    <p style="margin-top:15px;">
+        <span style="text-decoration:line-through; color:#888;">
+            {{ product.price }} somoni
+        </span>
+        <span style="color:#d9534f; font-size:24px; font-weight:bold;">
+            {{ discount_price|floatformat:2 }} somoni
+        </span>
+    </p>
+
+    {% if remaining_days > 0 %}
+        <p style="color:#e63946; font-weight:bold; margin-top:10px;">
+            🕒 Осталось {{ remaining_days }} дней до конца акции!
+        </p>
+    {% else %}
+        <p style="color:#e63946; font-weight:bold;">
+            ⛔ Акция закончилась
+        </p>
+    {% endif %}
+{% endif %}
+        {% if product.quantity %}
+            <p style="margin-top:10px; color:#777;">На складе: {{ product.quantity }}</p>
+        {% endif %}
+
+        {% if product.expiry_date %}
+            <p style="color:#777;">Срок годности: {{ product.expiry_date }}</p>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

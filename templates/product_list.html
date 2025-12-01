@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %} Products {% endblock title %}
+
+{% block content %}
+
+<h1 style="text-align:center; margin-top:20px;">
+    Продукты категории: {{ category.name }}
+</h1>
+
+<div style="
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    margin-top:30px;
+">
+
+    {% for product in products %}
+    <div style="
+        width:250px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        overflow:hidden;
+        text-align:center;
+        transition:0.3s;
+        padding-bottom:15px;
+    "
+    onmouseover="this.style.transform='scale(1.05)'"
+    onmouseout="this.style.transform='scale(1)'"
+    >
+
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="
+            width:100%;
+            height:180px;
+            object-fit:cover;
+        ">
+        {% else %}
+        <div style="
+            width:100%;
+            height:180px;
+            background:#eee;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        ">
+            Нет фото
+        </div>
+        {% endif %}
+
+        <h3 style="margin-top:10px;">{{ product.name }}</h3>
+
+        <p style="padding: 0 10px; color:#444; font-size:14px; height:50px; overflow:hidden;">
+            {{ product.description|truncatechars:60 }}
+        </p>
+{% if product.expiry_date %}
+            <p style="color:#777;">Срок годности: {{ product.expiry_date }}</p>
+        {% endif %}
+        <p style="font-size:20px; font-weight:bold; margin:15px 0;">
+            {% if product.discount %}
+                <span style="color:#777; text-decoration:line-through; margin-right:10px;">
+                    {{ product.price }} somoni
+                </span>
+                <span style="color:#d9534f;">
+                    {{ discount_price|floatformat:2 }} somoni
+                </span>
+            {% else %}
+                {{ product.price }} somoni
+            {% endif %}
+        </p>
+
+        <a href="{% url 'product_detail' product.id %}" style="
+            display:inline-block;
+            padding:10px 20px;
+            background:#007bff;
+            color:white;
+            text-decoration:none;
+            border-radius:5px;
+        "
+        onmouseover="this.style.background='#0056b3'"
+        onmouseout="this.style.background='#007bff'"
+        >
+            Подробнее
+        </a>
+
+    </div>
+    {% empty %}
+        <p style="text-align:center;">Товары отсутствуют</p>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
+

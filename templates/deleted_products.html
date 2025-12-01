@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Удалённые товары{% endblock title %}
+
+{% block content %}
+<h2 style="margin-bottom: 20px;">Удалённые товары</h2>
+
+{% if deleted_products %}
+<table style="width:100%; border-collapse: collapse; text-align:left;">
+    <thead>
+        <tr style="background:#222; color:white;">
+            <th style="padding:10px;">Название</th>
+            <th style="padding:10px;">Категория</th>
+            <th style="padding:10px;">Цена</th>
+            <th style="padding:10px;">Истёк срок</th>
+            <th style="padding:10px;">Удалён</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for item in deleted_products %}
+        <tr style="border-bottom:1px solid #ddd;">
+            <td style="padding:10px;">{{ item.product.name }}</td>
+            <td style="padding:10px;">{{ item.product.category.name }}</td>
+            <td style="padding:10px;">{{ item.product.price }}</td>
+            <td style="padding:10px;">{{ item.product.expiry_date }}</td>
+            <td style="padding:10px;">{{ item.deleted_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="margin-top: 20px;">Нет удалённых товаров.</p>
+{% endif %}
+
+{% endblock content %}
