@@ -144,7 +144,7 @@
                     <div class="dropdown">
                         <a href="#">{{ user.email }}</a>
                             <a href="{% url 'my_orders' %}">Мои заказы</a>
-                            <a href="#">Профиль</a>
+                            <a href="{% url 'profile_view' %}">Профиль</a>
                             <a href="{% url 'logout' %}">Выйти</a>
                     </div>
                 {% else %}

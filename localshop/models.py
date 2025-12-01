@@ -4,6 +4,9 @@ from accounts.models import CustomUser
 class Category(models.Model):
     name = models.CharField(max_length=100)
     image = models.ImageField()
+    def __str__(self):
+        return self.name
+    
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -16,6 +19,9 @@ class Product(models.Model):
     discount = models.PositiveIntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
     notified_about_discount = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
 
 class DeletedProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name="deleted_record")

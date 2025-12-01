@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %} Мой профиль {% endblock title %}
+
+{% block content %}
+
+<div style="max-width:600px; margin:50px auto; padding:30px; border:1px solid #ddd; border-radius:15px; box-shadow:0 4px 12px rgba(0,0,0,0.1); background:#fff; font-family:Arial, sans-serif;">
+    <h2 style="text-align:center; margin-bottom:30px; color:#333;">Мой профиль</h2>
+
+    <div style="display:flex; flex-direction:column; gap:15px;">
+        <div>
+            <strong>Имя:</strong> {{ user.username }}
+        </div>
+        <div>
+            <strong>Email:</strong> {{ user.email }}
+        </div>
+        <div>
+            <strong>Телефон:</strong> {{ profile.phone|default:"Не указан" }}
+        </div>
+        <div>
+            <strong>О себе:</strong>
+            <p style="margin:5px 0;">{{ profile.bio|default:"Нет информации" }}</p>
+        </div>
+        <div>
+            <strong>Аватар:</strong><br>
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" width="120" height="120" style="border-radius:50%; object-fit:cover; border:1px solid #ccc;">
+            {% else %}
+                <div style="width:120px; height:120px; background:#eee; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#999;">Нет фото</div>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'profile' %}" style="display:inline-block; margin-top:20px; text-decoration:none; background:#007bff; color:white; padding:10px 20px; border-radius:8px; text-align: center;">Редактировать профиль</a>
+    </div>
+</div>
+
+{% endblock content %}

@@ -3,6 +3,9 @@ from .models import CustomUser
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.hashers import make_password
 from .utils import send_activation_code
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+
 
 def home(request):
     return render(request, 'home.html') 
@@ -78,3 +81,32 @@ def confirm_code(request, user_id):
         return render(request, 'confirm_code.html', {'error': error})
 
     return render(request, 'confirm_code.html')
+from django.shortcuts import render, redirect
+from .models import UserProfile
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def profile(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        request.user.username = request.POST.get('username', request.user.username)
+        profile.phone = request.POST.get('phone', profile.phone)
+        profile.bio = request.POST.get('bio', profile.bio)
+
+        if request.FILES.get('avatar'):
+            profile.avatar = request.FILES['avatar']
+
+        request.user.save()
+        profile.save()
+        return redirect('profile')
+
+    return render(request, 'profile.html', {'user': request.user, 'profile': profile})
+
+@login_required
+def profile_view(request):
+    profile = get_object_or_404(UserProfile, user=request.user)
+    return render(request, 'profile_view.html', {
+        'profile': profile,
+        'user': request.user
+    })

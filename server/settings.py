@@ -133,5 +133,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'umedqorbonov1903@gmail.com'    
-EMAIL_HOST_PASSWORD = 'ssfkjzowndermlod'    
+EMAIL_HOST_PASSWORD = 'mmmwwqhwgmxwazwu'    
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
