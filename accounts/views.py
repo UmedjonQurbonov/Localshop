@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from .models import CustomUser
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.hashers import make_password
+from .utils import send_activation_code
 
 def home(request):
     return render(request, 'home.html') 
@@ -28,9 +29,10 @@ def register(request):
             })
         hash_password = make_password(password)
 
-        user = CustomUser.objects.create_user(email=email, password=hash_password, username=username)
+        user = CustomUser.objects.create_user( email=email, password=hash_password, username=username, is_active=False )
         user.save()
-        return redirect('login')            
+        send_activation_code(user)
+        return redirect('confirm_code', user_id=user.id)            
 
 def login_view(request):
     if request.method == 'GET':
@@ -53,3 +55,26 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+from django.utils import timezone
+from datetime import timedelta
+
+def confirm_code(request, user_id):
+    user = CustomUser.objects.get(pk=user_id)
+
+    if request.method == "POST":
+        code = request.POST.get('code')
+        if user.activation_code == code:
+            if user.code_created_at + timedelta(minutes=10) >= timezone.now():
+                user.is_active = True
+                user.activation_code = None
+                user.code_created_at = None
+                user.save()
+                return redirect('login')
+            else:
+                error = "Срок действия кода истёк."
+        else:
+            error = "Неверный код."
+        return render(request, 'confirm_code.html', {'error': error})
+
+    return render(request, 'confirm_code.html')
