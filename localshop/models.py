@@ -15,6 +15,7 @@ class Product(models.Model):
     image = models.ImageField(upload_to='products/', blank=True)
     discount = models.PositiveIntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
+    notified_about_discount = models.BooleanField(default=False)
 
 class DeletedProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name="deleted_record")
