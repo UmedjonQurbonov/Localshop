@@ -2,15 +2,360 @@
 {% block title %}Подтверждение кода{% endblock title %}
 
 {% block content %}
-<h2>Введите код подтверждения</h2>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+<style>
+    .verification-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        animation: containerFadeIn 0.6s ease-out;
+    }
 
-<form method="post">
-    {% csrf_token %}
-    <input type="text" name="code" maxlength="6" placeholder="6-значный код" required>
-    <button type="submit">Подтвердить</button>
-</form>
+    @keyframes containerFadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .verification-wrapper {
+        background: white;
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        padding: 0;
+        max-width: 480px;
+        width: 100%;
+        overflow: hidden;
+        animation: cardSlideUp 0.6s ease-out;
+    }
+
+    @keyframes cardSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .verification-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 50px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .verification-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: headerRotate 20s linear infinite;
+    }
+
+    @keyframes headerRotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .verification-icon {
+        font-size: 60px;
+        margin-bottom: 15px;
+        display: inline-block;
+        animation: iconPulse 2s ease-in-out infinite;
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes iconPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .verification-header h2 {
+        color: white;
+        font-size: 32px;
+        margin: 0 0 10px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+
+    .verification-header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .verification-form {
+        padding: 40px;
+    }
+
+    .error-message {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border-left: 4px solid #ef4444;
+        font-size: 14px;
+        font-weight: 600;
+        animation: errorShake 0.5s ease-out;
+    }
+
+    @keyframes errorShake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        25% {
+            transform: translateX(-10px);
+        }
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .code-input-wrapper {
+        margin-bottom: 30px;
+        animation: inputSlide 0.5s ease-out 0.2s backwards;
+    }
+
+    @keyframes inputSlide {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .code-input {
+        width: 100%;
+        padding: 20px;
+        border: 3px solid #e5e7eb;
+        border-radius: 15px;
+        font-size: 32px;
+        text-align: center;
+        letter-spacing: 8px;
+        font-weight: 700;
+        transition: all 0.3s;
+        outline: none;
+        background: #f9fafb;
+        font-family: 'Courier New', monospace;
+    }
+
+    .code-input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        background: white;
+        transform: scale(1.02);
+    }
+
+    .code-input:hover {
+        border-color: #d1d5db;
+    }
+
+    .code-input::placeholder {
+        letter-spacing: 4px;
+        font-size: 18px;
+        color: #9ca3af;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.4s;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: btnSlide 0.5s ease-out 0.3s backwards;
+    }
+
+    @keyframes btnSlide {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .submit-btn:hover::before {
+        width: 500px;
+        height: 500px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .helper-text {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: 20px;
+        animation: textFade 0.5s ease-out 0.4s backwards;
+    }
+
+    @keyframes textFade {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .resend-link {
+        color: #10b981;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .resend-link:hover {
+        color: #059669;
+        text-decoration: underline;
+    }
+
+    .security-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-radius: 12px;
+        margin-top: 25px;
+        font-size: 13px;
+        color: #065f46;
+        animation: badgeFade 0.5s ease-out 0.5s backwards;
+    }
+
+    @keyframes badgeFade {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .verification-header {
+            padding: 40px 30px;
+        }
+
+        .verification-header h2 {
+            font-size: 26px;
+        }
+
+        .verification-form {
+            padding: 30px 25px;
+        }
+
+        .code-input {
+            font-size: 24px;
+            letter-spacing: 6px;
+        }
+    }
+</style>
+
+<div class="verification-container">
+    <div class="verification-wrapper">
+        <div class="verification-header">
+            <div class="verification-icon">🔐</div>
+            <h2>Подтверждение кода</h2>
+            <p>Введите 6-значный код из email</p>
+        </div>
+
+        <form method="post" class="verification-form">
+            {% csrf_token %}
+            
+            {% if error %}
+            <div class="error-message">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="code-input-wrapper">
+                <input 
+                    type="text" 
+                    name="code" 
+                    class="code-input"
+                    maxlength="6" 
+                    placeholder="000000" 
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    required
+                    autofocus>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Подтвердить код
+            </button>
+
+            <div class="helper-text">
+                Не получили код? <a href="#" class="resend-link">Отправить повторно</a>
+            </div>
+
+            <div class="security-badge">
+                <span>🛡️</span>
+                <span>Защищённое соединение</span>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock content %}

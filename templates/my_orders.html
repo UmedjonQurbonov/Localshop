@@ -2,44 +2,409 @@
 {% block title %}Мои заказы{% endblock title %}
 
 {% block content %}
-<h2>Мои заказы</h2>
 
-{% if orders %}
-    {% for order in orders %}
-        <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:20px;">
-            <p><strong>Заказ №{{ order.id }}</strong> — {{ order.created_at|date:"Y-m-d H:i" }}</p>
-            <p>Статус: 
-                {% if order.status == 'new' %} 🛒 В корзине
-                {% elif order.status == 'confirmed' %} ✅ Подтверждён
-                {% elif order.status == 'shipped' %} 🚚 Отправлен
-                {% elif order.status == 'delivered' %} 📦 Доставлен
-                {% endif %}
-            </p>
+<style>
+    .orders-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        animation: containerFadeIn 0.6s ease-out;
+    }
+
+    @keyframes containerFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .orders-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .orders-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: headerRotate 20s linear infinite;
+    }
+
+    @keyframes headerRotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .orders-header h2 {
+        color: white;
+        font-size: 36px;
+        margin: 0;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+
+    .orders-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+        display: inline-block;
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 2px solid transparent;
+        transition: all 0.4s;
+        animation: cardSlideIn 0.6s ease-out backwards;
+    }
+
+    .order-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .order-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .order-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .order-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes cardSlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .order-card:hover {
+        border-color: #4f46e5;
+        box-shadow: 0 15px 50px rgba(79, 70, 229, 0.2);
+        transform: translateY(-5px);
+    }
+
+    .order-header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f3f4f6;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .order-number {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .order-date {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 14px;
+        animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .status-new {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+    }
+
+    .status-confirmed {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+    }
+
+    .status-shipped {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+    }
+
+    .status-delivered {
+        background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+        color: #6b21a8;
+    }
+
+    .order-table-wrapper {
+        overflow-x: auto;
+        margin: 20px 0;
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .order-table thead tr {
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        color: white;
+    }
+
+    .order-table th {
+        padding: 15px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .order-table thead tr th:first-child {
+        border-top-left-radius: 12px;
+    }
+
+    .order-table thead tr th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    .order-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s;
+    }
+
+    .order-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%);
+    }
+
+    .order-table td {
+        padding: 18px 15px;
+        text-align: center;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .quantity-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .price {
+        color: #4f46e5;
+        font-weight: 700;
+    }
+
+    .order-total {
+        background: linear-gradient(135deg, #f8f9ff 0%, #faf5ff 100%);
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+        border: 2px solid #4f46e5;
+    }
+
+    .order-total p {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        text-align: right;
+    }
+
+    .total-amount {
+        color: #4f46e5;
+        font-size: 24px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 40px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        animation: emptyFadeIn 0.6s ease-out;
+    }
+
+    @keyframes emptyFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .empty-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 20px;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .orders-header {
+            padding: 30px 20px;
+        }
+
+        .orders-header h2 {
+            font-size: 28px;
+        }
+
+        .order-card {
+            padding: 20px;
+        }
+
+        .order-header-info {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .order-number {
+            font-size: 18px;
+        }
+
+        .order-table th,
+        .order-table td {
+            padding: 12px 8px;
+            font-size: 12px;
+        }
+
+        .order-total p {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .total-amount {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<div class="orders-container">
+    <div class="orders-header">
+        <div class="orders-icon">📋</div>
+        <h2>Мои заказы</h2>
+    </div>
+
+    {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header-info">
+                <div>
+                    <div class="order-number">Заказ №{{ order.id }}</div>
+                    <div class="order-date">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                <div>
+                    {% if order.status == 'new' %}
+                        <span class="order-status status-new">🛒 В корзине</span>
+                    {% elif order.status == 'confirmed' %}
+                        <span class="order-status status-confirmed">✅ Подтверждён</span>
+                    {% elif order.status == 'shipped' %}
+                        <span class="order-status status-shipped">🚚 Отправлен</span>
+                    {% elif order.status == 'delivered' %}
+                        <span class="order-status status-delivered">📦 Доставлен</span>
+                    {% endif %}
+                </div>
+            </div>
             
-            <table style="width:100%; border-collapse: collapse; margin-top:10px;">
-                <tr style="background:#222; color:white;">
-                    <th>Товар</th>
-                    <th>Количество</th>
-                    <th>Цена за единицу</th>
-                    <th>Итого</th>
-                </tr>
-                {% for item in order.orderitem_set.all %}
-                <tr style="border-bottom:1px solid #ddd;">
-                    <td>{{ item.product.name }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.product.price }}</td>
-                    <td>{{ item.total_price }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+            <div class="order-table-wrapper">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Количество</th>
+                            <th>Цена за единицу</th>
+                            <th>Итого</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.orderitem_set.all %}
+                        <tr>
+                            <td class="product-name">{{ item.product.name }}</td>
+                            <td><span class="quantity-badge">{{ item.quantity }}</span></td>
+                            <td class="price">{{ item.product.price }} с.</td>
+                            <td class="price">{{ item.total_price }} с.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-            <p style="font-weight:bold; margin-top:10px;">
-                Общая сумма: {{ order.total_price }} сомони
-            </p>
+            <div class="order-total">
+                <p>Общая сумма: <span class="total-amount">{{ order.total_price }} сомони</span></p>
+            </div>
         </div>
-    {% endfor %}
-{% else %}
-<p>У вас пока нет заказов.</p>
-{% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <p>У вас пока нет заказов</p>
+        </div>
+    {% endif %}
+</div>
 
 {% endblock content %}

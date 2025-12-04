@@ -1,47 +1,308 @@
 {% extends "base.html" %}
-{% block title %} Home {% endblock title %}
+{% block title %} Категории {% endblock title %}
 
 {% block content %}
 
-<h1 style="text-align:center; margin-top: 20px;">Категории товаров</h1>
+<style>
+    .categories-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: containerFadeIn 0.6s ease-out;
+    }
 
-<div style="
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-">
+    @keyframes containerFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-    {% for category in categories %}
-    <div style="
-        width: 250px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        overflow: hidden;
+    .categories-header {
         text-align: center;
-        transition: 0.3s ease;
-    "
-    onmouseover="this.style.transform='scale(1.05)'"
-    onmouseout="this.style.transform='scale(1)'"
-    >
+        margin: 40px 0;
+        animation: headerSlideDown 0.6s ease-out;
+    }
 
-        <a href="{% url 'product_list' category.id %}" style="text-decoration:none; color:black;">
-            <img src="{{ category.image.url }}" alt="{{ category.name }}" style="
-                width: 100%;
-                height: 180px;
-                object-fit: cover;
-            ">
-            <h3 style="padding: 15px 0; font-size: 20px;">
-                {{ category.name }}
-            </h3>
-        </a>
+    @keyframes headerSlideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
+    .categories-header h1 {
+        font-size: 42px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+    }
+
+    .categories-header p {
+        color: #6b7280;
+        font-size: 18px;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        margin-top: 50px;
+        padding: 0 20px;
+    }
+
+    .category-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        animation: cardFadeIn 0.6s ease-out backwards;
+    }
+
+    .category-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .category-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .category-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .category-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .category-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .category-card:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.4s;
+        z-index: 1;
+    }
+
+    .category-card:hover::before {
+        opacity: 1;
+    }
+
+    .category-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 20px 60px rgba(79, 70, 229, 0.25);
+    }
+
+    .category-card a {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .category-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+    }
+
+    .category-image-wrapper::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+
+    .category-card:hover .category-image-wrapper::after {
+        opacity: 1;
+    }
+
+    .category-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .category-card:hover .category-image {
+        transform: scale(1.15) rotate(2deg);
+    }
+
+    .category-name {
+        padding: 25px 20px;
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f2937;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s;
+    }
+
+    .category-card:hover .category-name {
+        color: #4f46e5;
+        transform: scale(1.05);
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        z-index: 2;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.4s;
+    }
+
+    .category-card:hover .category-badge {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 100px 40px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        margin: 50px 20px;
+        animation: emptyFadeIn 0.6s ease-out;
+    }
+
+    @keyframes emptyFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .empty-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    .empty-state p {
+        font-size: 20px;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .categories-header h1 {
+            font-size: 32px;
+        }
+
+        .categories-header p {
+            font-size: 16px;
+        }
+
+        .categories-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .category-image-wrapper {
+            height: 180px;
+        }
+
+        .category-name {
+            font-size: 18px;
+            padding: 20px 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .categories-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="categories-container">
+    <div class="categories-header">
+        <h1>Категории товаров</h1>
+        <p>Выберите интересующую вас категорию</p>
     </div>
-    {% empty %}
-        <p>Категорий пока нет</p>
-    {% endfor %}
 
+    <div class="categories-grid">
+        {% for category in categories %}
+        <div class="category-card">
+            <a href="{% url 'product_list' category.id %}">
+                <span class="category-badge">Смотреть</span>
+                <div class="category-image-wrapper">
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="category-image">
+                </div>
+                <h3 class="category-name">{{ category.name }}</h3>
+            </a>
+        </div>
+        {% empty %}
+        <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">📦</div>
+            <p>Категорий пока нет</p>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% endblock %}

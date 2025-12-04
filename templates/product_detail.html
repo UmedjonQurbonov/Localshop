@@ -1,86 +1,157 @@
 {% extends "base.html" %}
-{% block title %} Product detail {% endblock title %}
+{% block title %}{{ product.name }} — в наличии!{% endblock %}
 
 {% block content %}
+<div style="max-width: 1100px; margin: 60px auto; padding: 20px;">
+  
+  <div style="
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: start;
+    background: #faf8ff;
+    border-radius: 32px;
+    padding: 50px;
+    box-shadow: 0 25px 80px rgba(180,150,255,0.22);
+    position: relative;
+    overflow: hidden;
+  ">
+    
+    <div style="position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(200,170,255,0.25), transparent 50%); pointer-events: none;"></div>
 
-<div style="display:flex; flex-wrap:wrap; justify-content:center; margin-top:30px; gap:20px;">
+    <div style="position: relative;">
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}"
+             style="
+               width: 100%;
+               border-radius: 24px;
+               box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+               transition: transform 0.6s;
+             "
+             onmouseover="this.style.transform='scale(1.04)'"
+             onmouseout="this.style.transform='scale(1)'">
+      {% else %}
+        <div style="
+          width: 100%; height: 520px; background: linear-gradient(135deg, #e6d9ff, #f5f0ff);
+          border-radius: 24px; display: flex; align-items: center; justify-content: center;
+          font-size: 1.8rem; color: #aaa; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        ">
+          Нет фото
+        </div>
+      {% endif %}
 
-    <div style="flex:1; min-width:300px; max-width:400px;">
-        {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="
-                width:100%;
-                border-radius:10px;
-                object-fit:cover;
-            ">
-        {% else %}
-            <div style="
-                width:100%;
-                height:300px;
-                background:#eee;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                border-radius:10px;
-            ">
-                Нет фото
-            </div>
-        {% endif %}
+      {% if product.discount > 0 %}
+        <div style="
+          position: absolute; top: 20px; left: -12px;
+          background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+          color: white; padding: 12px 28px; border-radius: 50px;
+          font-weight: 900; font-size: 1.4rem; box-shadow: 0 8px 20px rgba(255,107,107,0.4);
+          transform: rotate(-8deg);
+        ">
+          –{{ product.discount }}%
+        </div>
+      {% endif %}
     </div>
-    <div style="flex:1; min-width:300px; max-width:400px; border:1px solid #ddd; border-radius:10px; padding:20px;">
-        <h2 style="margin-top:0;">{{ product.name }}</h2>
-        <p style="color:#555;">Категория: {{ product.category.name }}</p>
 
-        <p style="color:#444; line-height:1.4;">{{ product.description|linebreaks }}</p>
+    <div style="position: relative; z-index: 2;">
+      
+      <h1 style="
+        font-size: 3.2rem;
+        font-weight: 900;
+        background: linear-gradient(90deg, #8a4bff, #b8a0ff, #c9a7ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 15px 0;
+        line-height: 1.1;
+      ">
+        {{ product.name }}
+      </h1>
 
+      <p style="color: #888; font-size: 1.2rem; margin-bottom: 20px;">
+        Категория: <strong>{{ product.category.name }}</strong>
+      </p>
 
-      <form action="{% url 'cart_add' product.id %}" method="post" style="margin-top:20px;">
-            {% csrf_token %}
-            <label for="quantity" style="margin-right:10px;">Количество:</label>
-            <input type="number" name="quantity" id="quantity" value="1" min="1" style="
-                width:60px; padding:5px; border:1px solid #ccc; border-radius:5px;
-            ">
-            <button type="submit" style="
-                padding:8px 20px;
-                background:#28a745;
-                color:white;
-                border:none;
-                border-radius:5px;
-                cursor:pointer;
-            "
-            onmouseover="this.style.background='#218838'"
-            onmouseout="this.style.background='#28a745'"
-            >Добавить в корзину</button>
-        </form> 
+      <div style="font-size: 1.3rem; line-height: 1.8; color: #555; margin: 30px 0;">
+        {{ product.description|linebreaks }}
+      </div>
 
+      <div style="margin: 40px 0;">
         {% if product.discount > 0 %}
-    <p style="margin-top:15px;">
-        <span style="text-decoration:line-through; color:#888;">
-            {{ product.price }} somoni
-        </span>
-        <span style="color:#d9534f; font-size:24px; font-weight:bold;">
-            {{ discount_price|floatformat:2 }} somoni
-        </span>
-    </p>
+          <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <span style="font-size: 2rem; color: #999; text-decoration: line-through;">
+              {{ product.price }} сомони
+            </span>
+            <span style="
+              font-size: 4.5rem;
+              font-weight: 900;
+              background: linear-gradient(90deg, #8a4bff, #a78bff);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+            ">
+              {{ discount_price|floatformat:0 }} сомони
+            </span>
+          </div>
 
-    {% if remaining_days > 0 %}
-        <p style="color:#e63946; font-weight:bold; margin-top:10px;">
-            🕒 Осталось {{ remaining_days }} дней до конца акции!
-        </p>
-    {% else %}
-        <p style="color:#e63946; font-weight:bold;">
-            ⛔ Акция закончилась
-        </p>
-    {% endif %}
-{% endif %}
+          {% if remaining_days > 0 %}
+            <div style="margin-top: 15px; padding: 15px 25px; background: #ffe6e6; border-radius: 16px; color: #c0392b; font-weight: 800; font-size: 1.3rem; display: inline-block;">
+              Осталось {{ remaining_days }} дн. до конца акции!
+            </div>
+          {% else %}
+            <div style="color: #e74c3c; font-weight: bold; font-size: 1.3rem;">
+              Акция закончилась
+            </div>
+          {% endif %}
+
+        {% else %}
+          <div style="font-size: 4rem; font-weight: 900; color: #8a4bff;">
+            {{ product.price }} сомони
+          </div>
+        {% endif %}
+      </div>
+
+      <div style="display: flex; gap: 30px; flex-wrap: wrap; margin: 25px 0; font-size: 1.1rem; color: #777;">
         {% if product.quantity %}
-            <p style="margin-top:10px; color:#777;">На складе: {{ product.quantity }}</p>
+          <div>На складе: <strong>{{ product.quantity }} шт.</strong></div>
         {% endif %}
-
         {% if product.expiry_date %}
-            <p style="color:#777;">Срок годности: {{ product.expiry_date }}</p>
+          <div>Срок годности: <strong>{{ product.expiry_date|date:"d.m.Y" }}</strong></div>
         {% endif %}
+      </div>
+
+      <form action="{% url 'cart_add' product.id %}" method="post" style="margin-top: 40px;">
+        {% csrf_token %}
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+          
+          <div style="display: flex; align-items: center; background: white; border-radius: 16px; padding: 8px; box-shadow: 0 8px 25px rgba(180,150,255,0.2);">
+            <label for="quantity" style="padding: 0 15px; font-weight: 600; color: #666;">Кол-во:</label>
+            <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.quantity|default:999 }}"
+                   style="width: 90px; padding: 14px; border: none; font-size: 1.4rem; font-weight: bold; text-align: center;">
+          </div>
+
+          <button type="submit" style="
+            padding: 22px 70px;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #a78bff, #c9a7ff, #8a4bff);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 15px 40px rgba(167,139,255,0.5);
+            transition: all 0.4s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+          "
+          onmouseover="this.style.transform='scale(1.07)'; this.style.boxShadow='0 25px 60px rgba(167,139,255,0.7)'"
+          onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 15px 40px rgba(167,139,255,0.5)'">
+            <span style="position: relative; z-index: 2;">В корзину</span>
+          </button>
+        </div>
+      </form>
 
     </div>
+  </div>
 </div>
-
 {% endblock %}

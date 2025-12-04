@@ -5,6 +5,9 @@ from django.contrib.auth.hashers import make_password
 from .utils import send_activation_code
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib.auth.hashers import check_password
 
 
 def home(request):
@@ -32,35 +35,38 @@ def register(request):
             })
         hash_password = make_password(password)
 
-        user = CustomUser.objects.create_user( email=email, password=hash_password, username=username, is_active=False )
+        user = CustomUser.objects.create_user( email=email, password=password, username=username, is_active=False )
         user.save()
         send_activation_code(user)
         return redirect('confirm_code', user_id=user.id)            
 
 def login_view(request):
     if request.method == 'GET':
-        return render(request, 'login.html') 
+        return render(request, 'login.html')
+    
     elif request.method == 'POST':
-        email = request.POST.get('email', None)
-        password = request.POST.get('password', None)
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
         if not email or not password:
-            return render(request, 'login.html', context={
-                "email": email,
-                "error":"Email must be set"
-            })
-        user = authenticate(request, email=email, password=password) 
+            return render(request, 'login.html', {"email": email, "error": "Email and password are required."})
+
+        user = authenticate(request, email=email, password=password)
+
         if user:
-            login(request, user)
-            return redirect('home')
+            if user.is_active:
+                login(request, user)
+                return redirect('home')
+            else:
+                print('error active')
+                return render(request, 'login.html', {"error": "Account is not activated."})
         else:
-            return render(request, "login.html", {"error": "Invalid credentials"})   
+            print('error credential')
+            return render(request, 'login.html', {"error": "Invalid credentials."})
         
 def logout_view(request):
     logout(request)
     return redirect('login')
-
-from django.utils import timezone
-from datetime import timedelta
 
 def confirm_code(request, user_id):
     user = CustomUser.objects.get(pk=user_id)

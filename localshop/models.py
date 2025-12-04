@@ -19,6 +19,10 @@ class Product(models.Model):
     discount = models.PositiveIntegerField(default=0)
     is_deleted = models.BooleanField(default=False)
     notified_about_discount = models.BooleanField(default=False)
+    class Meta:
+        verbose_name = "products"
+        verbose_name_plural = "products"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name

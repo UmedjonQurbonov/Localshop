@@ -2,19 +2,346 @@
 {% block title %}Регистрация{% endblock title %}
 
 {% block content %}
-<form method="post"> {% csrf_token %}
-    <label>Username</label>
-    <input type="text" name="username" value="{{username}}" required>
 
-    <label>Email</label>
-    <input type="email" name="email" value="{{email}}" required>
+<style>
+    .register-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        animation: containerFadeIn 0.6s ease-out;
+    }
 
-    <label>Password</label>
-    <input type="password" name="password" required>
+    @keyframes containerFadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
 
-    <label>Confirm password</label>
-    <input type="password" name="confirm_password">
+    .register-wrapper {
+        background: white;
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        padding: 0;
+        max-width: 500px;
+        width: 100%;
+        overflow: hidden;
+        animation: cardSlideUp 0.6s ease-out;
+    }
 
-    <input type="submit" value="Register">
-</form>
+    @keyframes cardSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        padding: 50px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .register-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: headerRotate 20s linear infinite;
+    }
+
+    @keyframes headerRotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .register-icon {
+        font-size: 60px;
+        margin-bottom: 15px;
+        display: inline-block;
+        animation: iconFloat 3s ease-in-out infinite;
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes iconFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-10px) rotate(5deg);
+        }
+    }
+
+    .register-header h2 {
+        color: white;
+        font-size: 32px;
+        margin: 0;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-header p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        margin: 10px 0 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .register-form {
+        padding: 40px;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+        animation: formGroupSlide 0.5s ease-out backwards;
+    }
+
+    .form-group:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .form-group:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .form-group:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    .form-group:nth-child(4) {
+        animation-delay: 0.5s;
+    }
+
+    .form-group:nth-child(5) {
+        animation-delay: 0.6s;
+    }
+
+    @keyframes formGroupSlide {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 15px 18px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.3s;
+        outline: none;
+        background: #f9fafb;
+    }
+
+    .form-group input:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        background: white;
+        transform: translateY(-2px);
+    }
+
+    .form-group input:hover {
+        border-color: #d1d5db;
+    }
+
+    .password-strength {
+        margin-top: 8px;
+        height: 4px;
+        background: #e5e7eb;
+        border-radius: 2px;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .form-group input[type="password"]:focus ~ .password-strength {
+        opacity: 1;
+    }
+
+    .strength-bar {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+        transition: width 0.3s;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.4s;
+        margin-top: 10px;
+        box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .submit-btn:hover::before {
+        width: 500px;
+        height: 500px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(79, 70, 229, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+
+    .form-footer {
+        text-align: center;
+        padding: 20px 40px 40px;
+        border-top: 1px solid #e5e7eb;
+        animation: footerFadeIn 0.6s ease-out 0.7s both;
+    }
+
+    @keyframes footerFadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .form-footer p {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .form-footer a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .form-footer a:hover {
+        color: #9333ea;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+        .register-header {
+            padding: 40px 30px;
+        }
+
+        .register-header h2 {
+            font-size: 26px;
+        }
+
+        .register-form {
+            padding: 30px 25px;
+        }
+
+        .form-footer {
+            padding: 20px 25px 30px;
+        }
+    }
+</style>
+
+<div class="register-container">
+    <div class="register-wrapper">
+        <div class="register-header">
+            <div class="register-icon">✨</div>
+            <h2>Создать аккаунт</h2>
+            <p>Присоединяйтесь к LocalShop сегодня</p>
+        </div>
+
+        <form method="post" class="register-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <input type="text" id="username" name="username" value="{{username}}" required placeholder="Введите ваше имя">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{email}}" required placeholder="example@mail.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required placeholder="Минимум 8 символов">
+                <div class="password-strength">
+                    <div class="strength-bar"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Подтверждение пароля</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Повторите пароль">
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Зарегистрироваться" class="submit-btn">
+            </div>
+        </form>
+
+        <div class="form-footer">
+            <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+        </div>
+    </div>
+</div>
+
 {% endblock content %}

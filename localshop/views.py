@@ -79,15 +79,16 @@ class CartView(LoginRequiredMixin, ListView):
             return order.orderitem_set.all()
         return []
 
-def get_or_create_order(user):
-    order, created = Order.objects.get_or_create(user=user, status='new')
-    return order
-def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         items = context['items']
         total = sum([item.total_price() for item in items])
         context['total_price'] = total
         return context
+
+def get_or_create_order(user):
+    order, created = Order.objects.get_or_create(user=user, status='new')
+    return order
 
 @login_required
 def add_to_cart(request, product_id):
@@ -102,7 +103,7 @@ def add_to_cart(request, product_id):
         order_item.quantity = quantity
     order_item.save()
 
-    return redirect('cart')
+    return redirect('category_list')
 
 def send_telegram_message(text):
     TG_TOKEN = "8358129923:AAFk230-gOABG0TagvKRAHKRS41YaCGw8Yg"
